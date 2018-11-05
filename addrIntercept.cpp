@@ -40,10 +40,14 @@ END_LEGAL */
 
 using namespace std;
 
-/* ===================================================================== */
-/* Global Variables */
-/* ===================================================================== */
+KNOB<string> KnobInputFifo(KNOB_MODE_WRITEONCE, "pintool",
+    "in", "in.fifo", "specify file name");
 
+KNOB<string> KnobOutputFifo(KNOB_MODE_WRITEONCE, "pintool",
+    "out", "out.fifo", "specify file name");
+
+static ifstream inFifo;
+static ofstream outFifo;
 
 // Move a register or literal to memory
 VOID storeReg2Addr(ADDRINT * op0, ADDRINT op1)
@@ -103,11 +107,11 @@ memoryTranslate * replaceFun( CONTEXT * context, AFUNPTR orgFuncptr,sizeMemoryTr
 
 INT32 Usage()
 {
-    cerr <<
+    cout <<
         "Help message\n"
         "\n";
-    cerr << KNOB_BASE::StringKnobSummary();
-    cerr << endl;
+    cout << KNOB_BASE::StringKnobSummary();
+    cout << endl;
     return -1;
 }
 
@@ -189,15 +193,29 @@ VOID EmulateStore(INS ins, VOID* v)
 }
 
 
-/* ===================================================================== */
+
+
+bool initFifo(){
+    inFifo.open(KnobInputFifo.Value().c_str());
+    outFifo.open(KnobOutputFifo.Value().c_str());
+    return inFifo.is_open() && inFifo.good() && outFifo.is_open() && outFifo.good();    
+}
+
 
 int main(int argc, CHAR *argv[])
 {
     PIN_InitSymbols();
 
-    if( PIN_Init(argc,argv) )
-    {
+    if( PIN_Init(argc,argv) ){
         return Usage();
+    }
+
+    cout << "Wait OCD client..." << endl;
+
+    if( initFifo() == false ){
+        cerr << "Error open fifo file: " << KnobInputFifo.Value() 
+            << " or " << KnobOutputFifo.Value() << endl;
+        return -2;
     }
 
     IMG_AddInstrumentFunction(ImageReplace, 0);
@@ -206,7 +224,7 @@ int main(int argc, CHAR *argv[])
 
     INS_AddInstrumentFunction(EmulateStore, 0);
     
-    
+
     PIN_StartProgram();
     
     return 0;

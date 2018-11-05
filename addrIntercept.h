@@ -29,8 +29,8 @@ void resetChip();
 ChipErrorType showError();
 
 
-#define NAME_MEMORY_MAP_FUNCTION  "getMemoryMap"
-#define NAME_MEMORY_MAP_FREE_FUNCTION  "freeMemoryMap"
+#define NAME_MEMORY_MAP_FUNCTION  		"getMemoryMap"
+#define NAME_MEMORY_MAP_FREE_FUNCTION  	"freeMemoryMap"
 
-#define NAME_RESET_CHIP_FUNCTION  "resetChip"
-#define NAME_ERROR_FUNCTION  "showError"
+#define NAME_RESET_CHIP_FUNCTION  		"resetChip"
+#define NAME_ERROR_FUNCTION  			"showError"
