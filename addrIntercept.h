@@ -7,7 +7,7 @@ typedef enum {
 } ChipErrorType;
 
 
-typedef uint8_t * addr_t;
+typedef uint64_t * addr_t;
 
 typedef struct
 {
