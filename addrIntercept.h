@@ -1,6 +1,9 @@
 #include <stdint.h>
 #pragma once
 
+#ifdef __cplusplus
+extern "C" {
+#endif
 
 typedef enum {
 	NO_ERROR
@@ -34,3 +37,8 @@ ChipErrorType showError();
 
 #define NAME_RESET_CHIP_FUNCTION  		"resetChip"
 #define NAME_ERROR_FUNCTION  			"showError"
+
+
+#ifdef __cplusplus
+}
+#endif
