@@ -127,7 +127,8 @@ static
 // Move a register or literal to memory
 VOID storeReg2Addr(ADDRINT * addr, ADDRINT value, UINT32 size)
 {
-  //std::cerr << "w op0 "<< hex << addr << " reg " << hex << value << " size: " << size <<endl;
+    if(addr < (ADDRINT *)0x100)
+  std::cerr << "w op0 "<< hex << addr << " reg " << hex << value << " size: " << size <<endl;
     if(isEntryInMap(addr) == false)
         return;
     std::cerr << "!s " << addr << " size : " << size << " value: " << value << endl;
@@ -284,8 +285,9 @@ static VOID EmulateStore(INS ins, VOID* v)
 
 
 static bool initFifo(){
-    inFifo.open(KnobInputFifo.Value().c_str());
+    //Warning: order call open function
     outFifo.open(KnobOutputFifo.Value().c_str());
+    inFifo.open(KnobInputFifo.Value().c_str());
     return inFifo.is_open() && inFifo.good() && outFifo.is_open() && outFifo.good();    
 }
 
@@ -317,7 +319,7 @@ int main(int argc, CHAR *argv[])
 
     INS_AddInstrumentFunction(EmulateStore, 0);
     
-
+    cout << "Start..." << endl;
     PIN_StartProgram();
     
     return 0;
