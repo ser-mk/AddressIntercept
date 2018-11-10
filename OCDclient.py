@@ -6,6 +6,9 @@ import errno
 import stat
 import argparse
 
+from addrIntercept import proccess
+
+
 parser = argparse.ArgumentParser(description='OCD client')
 
 parser.add_argument("-in_", help="in fifo  addr interepter", default='out.fifo')
@@ -42,10 +45,11 @@ with open(IN_FIFO,'r') as inFifo:
         print("FIFO opened")
         while True:
             line = inFifo.readline()
-            print("line:",line)
             if len(line) == 0:
                 print(IN_FIFO," closed")
                 break
-            outFifo.write(line)
+            print("line:",line)
+            answer = proccess(line)
+            outFifo.write(answer)
             outFifo.flush()
 
