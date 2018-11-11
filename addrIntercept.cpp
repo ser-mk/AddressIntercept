@@ -38,7 +38,7 @@ END_LEGAL */
 #include "addrIntercept.h"
 
 //todo: add magic field
-#define FORMAT_PIPE_STRING "id:%lx | %s | addr: %p | size: %d | value: %lx"
+#define FORMAT_PIPE_STRING "id:%ld | %s | addr: %p | size: %d | value: 0x%lx"
 static const size_t NUMBER_ARGS_FROM_PIPE_STRING = 5;
 
 static const std::string COMMAND_LOAD("LOAD");

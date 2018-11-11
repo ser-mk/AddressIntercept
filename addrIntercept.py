@@ -6,7 +6,7 @@ from scanf import scanf
 from pprint import pprint
 
 
-PATTERN_SCANF = "id:%d | %s | addr: %x | size: %d | value: %x"
+PATTERN_SCANF 	= "id:%d | %s | addr: %x | size: %d | value: %x"
 PATTERN_SPRINTF = "id:%d | %s | addr: 0x%x | size: %d | value: 0x%x"
 
 COMMAND_LOAD = "LOAD"
