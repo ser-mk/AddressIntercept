@@ -40,10 +40,10 @@ def compareData(a, b):
 
 class OpenOcd:
     COMMAND_TOKEN = '\x1a'
-    def __init__(self, verbose=False):
+    def __init__(self, verbose:bool = False, tclRpcIp:str = "127.0.0.1", tclRpcPort:int = 6666):
         self.verbose = verbose
-        self.tclRpcIp       = "127.0.0.1"
-        self.tclRpcPort     = 6666
+        self.tclRpcIp       = tclRpcIp  #"127.0.0.1"
+        self.tclRpcPort     = tclRpcPort
         self.bufferSize     = 4096
 
         self.sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
@@ -112,7 +112,7 @@ if __name__ == "__main__":
     def show(*args):
         print(*args, end="\n\n")
 
-    with OpenOcd() as ocd:
+    with OpenOcd(verbose = False, tclRpcIp = "192.168.0.111" ) as ocd:
         ocd.send("reset")
 
         show(ocd.send("ocd_echo \"echo says hi!\"")[:-1])
@@ -120,7 +120,7 @@ if __name__ == "__main__":
 
         # Read the first few words at the RAM region (put starting adress of RAM
         # region into 'addr')
-        addr = 0x10000000
+        addr = 0x20000000
 
         value = ocd.readVariable(addr)
         show("variable @ %s: %s" % (hexify(addr), hexify(value)))
