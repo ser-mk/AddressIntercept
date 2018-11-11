@@ -1,3 +1,6 @@
+ocd_rpc.py
+scanf.py
+addrIntercept.py
 OCDclient.py
 addrIntercept.cpp
 addrIntercept.h
