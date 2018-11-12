@@ -22,6 +22,7 @@ OCD_ERROR_STATUS = "OCD_ERROR"
 _ocdw = None
 
 def initOCD(ocd:OpenOcd) -> None :
+	global _ocdw
 	_ocdw = OCDWrapp(ocd)
 	ocd.send("reset")
 
@@ -90,11 +91,16 @@ def _parse(line: str) -> AddrCommand:
 
 def proccess(line: str) -> str:
 	struct_command = _parse(line)
-	print("@",struct_command._id, struct_command.command, struct_command.addr, struct_command.size, struct_command.value, struct_command.status)
+	print("struct_command: ",struct_command._id, struct_command.command, struct_command.addr, struct_command.size, struct_command.value, struct_command.status)
 	if struct_command.command == COMMAND_LOAD :
-		pass
+		value = _load(struct_command)
+		if value < 0 :
+			struct_command.status = OCD_ERROR_STATUS
+		else:
+			struct_command.value = value
 	elif struct_command.command == COMMAND_STORE:
-		pass
+		if not _store(struct_command):
+			struct_command.status = OCD_ERROR_STATUS;
 
 	return _createLine(struct_command)
 
