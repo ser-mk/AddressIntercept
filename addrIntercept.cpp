@@ -36,6 +36,7 @@ END_LEGAL */
 #include <iostream>
 #include <fstream>
 #include "addrIntercept.h"
+#include "logger.h"
 
 //todo: add magic field
 #define FORMAT_PIPE_STRING "id:%ld | %s | addr: %p | size: %d | value: 0x%lx | st: %s"
@@ -43,6 +44,8 @@ static const size_t NUMBER_ARGS_FROM_PIPE_STRING = 6;
 
 static const std::string COMMAND_LOAD("LOAD");
 static const std::string COMMAND_STORE("STORE");
+
+LevelDebug Log::gLevel = _ERROR;
 
 using namespace std;
 
