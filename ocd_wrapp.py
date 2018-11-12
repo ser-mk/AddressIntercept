@@ -14,31 +14,32 @@ class OCDWrapp():
 	def __init__(self, ocd: OpenOcd):
 		self.ocd = ocd;
 
-	def load(addr: int, size: int) -> int:
-		addr &= __ADDR_MASK
+	def load(self, addr: int, size: int) -> int:
+		addr &= self.__ADDR_MASK
 		tmp = self.ocd.readVariable(addr)
-		if size == __WORD_SIZE :
-			tmp &= __WORD_MASK
-		elif size == __HALF_WORD_SIZE :
-			tmp &= __HALF_WORD_MASK
-		elif size == __BYTE_SIZE:
-			tmp &= __BYTE_MASK
+		print("type: ", type(tmp))
+		if size == self.__WORD_SIZE :
+			tmp &= self.__WORD_MASK
+		elif size == self.__HALF_WORD_SIZE :
+			tmp &= self.__HALF_WORD_MASK
+		elif size == self.__BYTE_SIZE:
+			tmp &= self.__BYTE_MASK
 		else :
 			tmp = None
 			print("error load size!")
 		return tmp
 
-	def store(addr: int, size: int, value: int) -> bool:
-		if size == __WORD_SIZE :
-			value &= __WORD_MASK
+	def store(self, addr: int, size: int, value: int) -> bool:
+		if size == self.__WORD_SIZE :
+			value &= self.__WORD_MASK
 			self.ocd.writeVariable(addr, value)
 
 		read = self.ocd.readVariable(addr)
 		tmp = 0
-		if size == __HALF_WORD_SIZE :
-			tmp = (read & (__WORD_MASK ^ __HALF_WORD_MASK)) | value # read & 0xFFFF 0000
+		if size == self.__HALF_WORD_SIZE :
+			tmp = (read & (self.__WORD_MASK ^ self.__HALF_WORD_MASK)) | value # read & 0xFFFF 0000
 		elif size == __BYTE_SIZE:
-			tmp = (read & (__WORD_MASK ^ __BYTE_MASK)) | value # read & 0xFFFF FF00
+			tmp = (read & (self.__WORD_MASK ^ self.__BYTE_MASK)) | value # read & 0xFFFF FF00
 		else :
 			print("error store size!")
 			return False
