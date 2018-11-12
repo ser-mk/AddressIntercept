@@ -6,7 +6,9 @@ import errno
 import stat
 import argparse
 
-from addrIntercept import proccess
+from ocd_rpc import OpenOcd
+
+from addrIntercept import proccess, initOCD
 
 
 parser = argparse.ArgumentParser(description='OCD client')
@@ -15,9 +17,13 @@ parser.add_argument("-in_", help="in fifo  addr interepter", default='out.fifo')
 
 parser.add_argument("-out", help="out fifo addr interepter", default='in.fifo')
 
+parser.add_argument("-ip", help="ip rcp openOCD server", default="127.0.0.1")
+
+parser.add_argument("-port", help="port rcp openOCD server", type=int, default=6666)
+
 args = parser.parse_args()
 
-print(args.in_, args.out)
+print(args.in_, args.out, args.ip)
 
 IN_FIFO = args.in_
 OUT_FIFO = args.out
@@ -43,13 +49,17 @@ if not stat.S_ISFIFO(os.stat(OUT_FIFO).st_mode) :
 with open(IN_FIFO,'r') as inFifo:
     with open(OUT_FIFO,'w') as outFifo:
         print("FIFO opened")
-        while True:
-            line = inFifo.readline()
-            if len(line) == 0:
-                print(IN_FIFO," closed")
-                break
-            print("line:",line)
-            answer = proccess(line)
-            outFifo.write(answer)
-            outFifo.flush()
+        with OpenOcd(tclRpcIp = args.ip) as ocd:
+            initOCD(ocd)
+            print("OpenOcd init")
+            while True:
+                line = inFifo.readline()
+                if len(line) == 0:
+                    print(IN_FIFO," closed")
+                    break
+                print("Get line:",line)
+                answer = proccess(line)
+                print("answer : ", answer)
+                outFifo.write(answer)
+                outFifo.flush()
 
