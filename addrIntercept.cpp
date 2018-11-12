@@ -38,8 +38,8 @@ END_LEGAL */
 #include "addrIntercept.h"
 
 //todo: add magic field
-#define FORMAT_PIPE_STRING "id:%ld | %s | addr: %p | size: %d | value: 0x%lx"
-static const size_t NUMBER_ARGS_FROM_PIPE_STRING = 5;
+#define FORMAT_PIPE_STRING "id:%ld | %s | addr: %p | size: %d | value: 0x%lx | st: %s"
+static const size_t NUMBER_ARGS_FROM_PIPE_STRING = 6;
 
 static const std::string COMMAND_LOAD("LOAD");
 static const std::string COMMAND_STORE("STORE");
@@ -79,7 +79,7 @@ static bool isEntryInMap(const ADDRINT * addr){
 static void sendCommand(const string & command, const ADDRINT * addr, const UINT32 size, const ADDRINT value){
 
     const int write_size = snprintf(pipeBuffer, BUFFER_SIZE, FORMAT_PIPE_STRING, //"id:%lx | %s | addr: %p | size: %d | value: %lx",
-             id, command.c_str(), addr, size, value);
+             id, command.c_str(), addr, size, value, "");
     if(write_size <= 0){
         std::cerr << "small pipe buffer: " << BUFFER_SIZE <<  endl;
     }
@@ -89,17 +89,18 @@ static void sendCommand(const string & command, const ADDRINT * addr, const UINT
 
 static bool parseValue(const string & line, ADDRINT & value){
     char command_str[20];
+    char status_str[20];
     uint64_t id_in = 0;
     ADDRINT * addr = NULL;
     UINT32 size = 0;
 
-    const int scan_size = sscanf(line.c_str(), FORMAT_PIPE_STRING, &id_in, command_str, &addr, &size, &value);
+    const int scan_size = sscanf(line.c_str(), FORMAT_PIPE_STRING, &id_in, command_str, &addr, &size, &value, status_str);
     if(scan_size != NUMBER_ARGS_FROM_PIPE_STRING){
         std::cerr << "Can't parse value from pipe, success args: " << scan_size <<  endl;
         return false;
     }
 
-    std::cerr << " " << id_in << " " << command_str <<" " << addr <<" " << size <<" " << value << endl;
+    std::cerr << " " << id_in << " " << command_str <<" " << addr <<" " << size <<" " << value << " status_str " << status_str << endl;
 
     if(id != id_in){
         std::cerr << "wrong id message: " << id_in << " expected: " << id <<  endl;
