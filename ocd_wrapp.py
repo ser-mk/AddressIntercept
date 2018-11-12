@@ -38,7 +38,7 @@ class OCDWrapp():
 		tmp = 0
 		if size == self.__HALF_WORD_SIZE :
 			tmp = (read & (self.__WORD_MASK ^ self.__HALF_WORD_MASK)) | value # read & 0xFFFF 0000
-		elif size == __BYTE_SIZE:
+		elif size == self.__BYTE_SIZE:
 			tmp = (read & (self.__WORD_MASK ^ self.__BYTE_MASK)) | value # read & 0xFFFF FF00
 		else :
 			print("error store size!")
