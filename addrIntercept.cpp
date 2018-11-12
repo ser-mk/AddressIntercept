@@ -76,10 +76,24 @@ static bool isEntryInMap(const ADDRINT * addr){
     return false;
 }
 
+static ADDRINT * local2remoteAddr(const ADDRINT * addr){
+    ADDRINT * remoteAddr = NULL;
+    for(sizeMemoryTranslate_t i = 0; i < sizeMap; i++){
+        bool isEntry = addrMap[i].start_addr <= addr;
+        isEntry &= addrMap[i].end_addr > addr;
+        if(isEntry){
+            remoteAddr = addr - addrMap[i].start_addr + addrMap[i].reference_addr;
+            break;
+        }
+    }
+    return remoteAddr;
+}
+
 static void sendCommand(const string & command, const ADDRINT * addr, const UINT32 size, const ADDRINT value){
 
+    const ADDRINT * remAddr = local2remoteAddr(addr);
     const int write_size = snprintf(pipeBuffer, BUFFER_SIZE, FORMAT_PIPE_STRING, //"id:%lx | %s | addr: %p | size: %d | value: %lx",
-             id, command.c_str(), addr, size, value, "");
+             id, command.c_str(), remAddr, size, value, "");
     if(write_size <= 0){
         std::cerr << "small pipe buffer: " << BUFFER_SIZE <<  endl;
     }
