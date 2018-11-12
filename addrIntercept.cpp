@@ -101,7 +101,7 @@ static void sendCommand(const string & command, const ADDRINT * addr, const UINT
     const int write_size = snprintf(pipeBuffer, BUFFER_SIZE, FORMAT_PIPE_STRING, //"id:%lx | %s | addr: %p | size: %d | value: %lx",
              id, command.c_str(), remAddr, size, value, "");
     if(write_size <= 0){
-        std::cerr << "small pipe buffer: " << BUFFER_SIZE <<  endl;
+        MAGIC_LOG(_ERROR) << "small pipe buffer: " << BUFFER_SIZE;
     }
 
     outFifo << pipeBuffer <<  endl;
@@ -116,14 +116,14 @@ static bool parseValue(const string & line, ADDRINT & value){
 
     const int scan_size = sscanf(line.c_str(), FORMAT_PIPE_STRING, &id_in, command_str, &addr, &size, &value, status_str);
     if(scan_size != NUMBER_ARGS_FROM_PIPE_STRING){
-        std::cerr << "Can't parse value from pipe, success args: " << scan_size <<  endl;
+        MAGIC_LOG(_ERROR) << "Can't parse value from pipe, success args: " << scan_size;
         return false;
     }
 
-    std::cerr << " " << id_in << " " << command_str <<" " << addr <<" " << size <<" " << value << " status_str " << status_str << endl;
+   MAGIC_LOG(_DEBUG) << " " << id_in << " " << command_str <<" " << addr <<" " << size <<" " << value << " status_str " << status_str;
 
     if(id != id_in){
-        std::cerr << "wrong id message: " << id_in << " expected: " << id <<  endl;
+        MAGIC_LOG(_ERROR) << "wrong id message: " << id_in << " expected: " << id;
         return false;
     }
 
@@ -150,17 +150,17 @@ VOID storeReg2Addr(ADDRINT * addr, ADDRINT value, UINT32 size)
 {
     if(isEntryInMap(addr) == false)
         return;
-    std::cerr << "!s " << addr << " size : " << size << " value: " << value << endl;
+    MAGIC_LOG(_DEBUG) << "!s " << addr << " size : " << size << " value: " << value;
     std::string   line;
     sendCommand(COMMAND_STORE, addr, size, value);
     std::getline(inFifo, line);
     ADDRINT remoteValue = 0;
     if(parseValue(line, remoteValue) == false){
-        std::cerr << "error store addr: " << addr << endl;
+        MAGIC_LOG(_ERROR)<< "error store addr: " << addr ;
     }
 
     if(remoteValue != value){
-        std::cerr << "error store addr: " << addr << " expected value: " << value << " recieve: " << remoteValue << endl;
+        MAGIC_LOG(_ERROR) << "error store addr: " << addr << " expected value: " << value << " recieve: " << remoteValue ;
     }
 
 }
@@ -178,7 +178,7 @@ static ADDRINT loadAddr2Reg(ADDRINT * addr, UINT32 size)
     ADDRINT value;
 
     if(isEntryInMap(addr)){
-        std::cerr << "! " << addr << " size : " << size <<  endl;
+        MAGIC_LOG(_DEBUG) << "! " << addr << " size : " << size;
         return queryValue(addr, size);
   } else {
         PIN_SafeCopy(&value, addr, sizeof(ADDRINT));
@@ -188,7 +188,7 @@ static ADDRINT loadAddr2Reg(ADDRINT * addr, UINT32 size)
 
 
 static memoryTranslate * replaceMemoryMapFun( CONTEXT * context, AFUNPTR orgFuncptr,sizeMemoryTranslate_t * size ){
-    cerr << "call ... size: " << size  << endl;
+    MAGIC_LOG(_INFO) << "call ... size: " << size ;
 
         PIN_CallApplicationFunction(context, PIN_ThreadId(),
             CALLINGSTD_DEFAULT, orgFuncptr, NULL,
@@ -198,9 +198,7 @@ static memoryTranslate * replaceMemoryMapFun( CONTEXT * context, AFUNPTR orgFunc
 
         sizeMap = *size;
 
-        cerr << "call end"  << endl;
-
-         cerr << "memoryTranslate : " << addrMap << endl;
+         MAGIC_LOG(_INFO) << "memoryTranslate : " << addrMap;
     return addrMap;
 }
 
@@ -239,7 +237,7 @@ static VOID ImageReplace(IMG img, VOID *v)
             IARG_FUNCARG_ENTRYPOINT_VALUE, 0,
             IARG_END);
 
-        cout << "!Replaced free() in:"  << IMG_Name(img) << endl;
+        MAGIC_LOG(_INFO) << "!Replaced free() in:"  << IMG_Name(img);
     }
 }
 
@@ -321,12 +319,11 @@ int main(int argc, CHAR *argv[])
 
     Log::setGLevel((LevelDebug)(KnobLevelDebug.Value() & 0xF));
 
-    //cout
     MAGIC_LOG(_INFO) << "Wait OCD client...";
 
     if( initFifo() == false ){
-        cerr << "Error open fifo file: " << KnobInputFifo.Value() 
-            << " or " << KnobOutputFifo.Value() << endl;
+        MAGIC_LOG(_ERROR) << "Error open fifo file: " << KnobInputFifo.Value()
+            << " or " << KnobOutputFifo.Value();
         return -2;
     }
 /*
@@ -341,7 +338,7 @@ int main(int argc, CHAR *argv[])
 
     INS_AddInstrumentFunction(EmulateStore, 0);
     
-    cout << "Start..." << endl;
+    MAGIC_LOG(_DEBUG) << "Start...";
     PIN_StartProgram();
     
     return 0;
