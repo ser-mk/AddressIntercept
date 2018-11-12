@@ -55,6 +55,9 @@ KNOB<string> KnobInputFifo(KNOB_MODE_WRITEONCE, "pintool",
 KNOB<string> KnobOutputFifo(KNOB_MODE_WRITEONCE, "pintool",
     "out", "out.fifo", "specify file name");
 
+KNOB<int> KnobLevelDebug(KNOB_MODE_WRITEONCE, "pintool",
+    "v", "0", "specify the current scenario to be checked (0-4)");
+
 static ifstream inFifo;
 static ofstream outFifo;
 static memoryTranslate * addrMap = NULL;
@@ -316,7 +319,10 @@ int main(int argc, CHAR *argv[])
         return Usage();
     }
 
-    cout << "Wait OCD client..." << endl;
+    Log::setGLevel((LevelDebug)(KnobLevelDebug.Value() & 0xF));
+
+    //cout
+    MAGIC_LOG(_INFO) << "Wait OCD client...";
 
     if( initFifo() == false ){
         cerr << "Error open fifo file: " << KnobInputFifo.Value() 
