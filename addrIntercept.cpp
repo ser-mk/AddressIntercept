@@ -142,8 +142,6 @@ static
 // Move a register or literal to memory
 VOID storeReg2Addr(ADDRINT * addr, ADDRINT value, UINT32 size)
 {
-    if(addr < (ADDRINT *)0x100)
-  std::cerr << "w op0 "<< hex << addr << " reg " << hex << value << " size: " << size <<endl;
     if(isEntryInMap(addr) == false)
         return;
     std::cerr << "!s " << addr << " size : " << size << " value: " << value << endl;
