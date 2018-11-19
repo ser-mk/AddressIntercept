@@ -43,6 +43,7 @@ def _checkValueSuccess(value):
 	return False
 
 def _load(struct_command:AddrCommand) -> int :
+	global _ocdw
 	value = -1
 	try:
 		value = _ocdw.load(struct_command.addr, struct_command.size)
@@ -58,6 +59,7 @@ def _load(struct_command:AddrCommand) -> int :
 	
 	
 def _store(struct_command:AddrCommand) -> bool :
+	global _ocdw
 	success = False
 	try:
 		success = _ocdw.store(struct_command.addr, struct_command.size, struct_command.value)
