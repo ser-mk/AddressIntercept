@@ -9,8 +9,11 @@ typedef enum {
 	NO_ERROR
 } ChipErrorType;
 
-
+#if defined(TARGET_IA32)
+typedef uint32_t * addr_t;
+#else
 typedef uint64_t * addr_t;
+#endif
 
 typedef struct
 {
