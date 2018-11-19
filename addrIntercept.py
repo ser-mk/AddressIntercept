@@ -24,7 +24,7 @@ _ocdw = None
 def initOCD(ocd:OpenOcd) -> None :
 	global _ocdw
 	_ocdw = OCDWrapp(ocd)
-	ocd.send("reset")
+	ocd.send("reset halt")
 
 
 class AddrCommand:
