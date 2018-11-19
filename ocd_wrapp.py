@@ -33,6 +33,7 @@ class OCDWrapp():
 		if size == self.__WORD_SIZE :
 			value &= self.__WORD_MASK
 			self.ocd.writeVariable(addr, value)
+			return True
 
 		read = self.ocd.readVariable(addr)
 		tmp = 0
@@ -44,5 +45,5 @@ class OCDWrapp():
 			print("error store size!")
 			return False
 
-		ocd.writeVariable(addr, tmp)
+		self.ocd.writeVariable(addr, tmp)
 		return True
