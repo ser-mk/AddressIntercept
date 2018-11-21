@@ -151,10 +151,9 @@ static ADDRINT queryValue(const ADDRINT * addr, const UINT32 size){
     return value;
 }
 
-static
 
 // Move a register or literal to memory
-VOID storeReg2Addr(ADDRINT * addr, ADDRINT value, UINT32 size)
+static VOID storeReg2Addr(const ADDRINT * addr, const ADDRINT value, const UINT32 size)
 {
     if(isEntryInMap(addr) == false)
         return;
@@ -174,21 +173,20 @@ VOID storeReg2Addr(ADDRINT * addr, ADDRINT value, UINT32 size)
 }
 
 // Move from memory to register
-static ADDRINT loadAddr2Reg(ADDRINT * addr, UINT32 size)
+static ADDRINT loadAddr2Reg( ADDRINT * addr, UINT32 size)
 {
-    ADDRINT value;
+    ADDRINT value = 0;
 
     if(isEntryInMap(addr)){
-        MAGIC_LOG(_DEBUG) << "! " << addr << " size : " << size;
-        return queryValue(addr, size);
+        MAGIC_LOG(_DEBUG)<< "addr : " << addr << " size : " << size;
+        value = queryValue(addr, size);
   } else {
-        PIN_SafeCopy(&value, addr, sizeof(ADDRINT));
-        return value;
+        PIN_SafeCopy(&value, addr, size);
   }
+    return value;
 }
 
-
-VOID multiMemAccessStore(const PIN_MULTI_MEM_ACCESS_INFO* multiMemAccessInfo, const ADDRINT value)
+static VOID multiMemAccessStore(const PIN_MULTI_MEM_ACCESS_INFO* multiMemAccessInfo, const ADDRINT value)
 {
     if(multiMemAccessInfo->numberOfMemops != 1)
         return;
@@ -201,7 +199,9 @@ VOID multiMemAccessStore(const PIN_MULTI_MEM_ACCESS_INFO* multiMemAccessInfo, co
         return;
 
     std::cerr << "addr : " << addr << " value: "
-              <<  hex << value << " size: " << size << endl;;
+              <<  hex << value << " size: " << size << endl;
+
+    storeReg2Addr(addr,value,size);
 }
 
 static memoryTranslate * replaceMemoryMapFun( CONTEXT * context, AFUNPTR orgFuncptr,sizeMemoryTranslate_t * size ){
@@ -262,13 +262,13 @@ static VOID ImageReplace(IMG img, VOID *v)
 static VOID EmulateLoad(INS ins, VOID* v)
 {
     // Find the instructions that move a value from memory to a register
-    if (INS_Opcode(ins) == XED_ICLASS_MOV &&
+    if ( (INS_Opcode(ins) == XED_ICLASS_MOV
+          || INS_Opcode(ins) == XED_ICLASS_MOVZX
+          ) &&
         INS_IsMemoryRead(ins) &&
         INS_OperandIsReg(ins, 0) &&
         INS_OperandIsMemory(ins, 1))
     {
-      //std::cerr << "Instrumenting at " << hex << INS_Address(ins) << " " << INS_Disassemble(ins).c_str() << std::endl;
-
         INS_InsertCall(ins,
                        IPOINT_BEFORE,
                        AFUNPTR(loadAddr2Reg),
@@ -280,19 +280,6 @@ static VOID EmulateLoad(INS ins, VOID* v)
 
         // Delete the instruction
         INS_Delete(ins);
-    }
-
-    if (INS_HasMemoryRead2(ins))
-    {
-        std::cerr << "INS_HasMemoryRead2 at " << hex << INS_Address(ins) << " " << INS_Disassemble(ins).c_str() << std::endl;
-    }
-
-    if (false &&
-            INS_IsMemoryRead(ins) &&
-            INS_OperandIsReg(ins, 0) &&
-            INS_OperandIsMemory(ins, 1))
-    {
-        std::cerr << "INS_IsMemoryRead at " << hex << INS_Address(ins) << " " << INS_Disassemble(ins).c_str() << std::endl;
     }
 }
 
