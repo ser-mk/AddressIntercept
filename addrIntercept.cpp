@@ -195,6 +195,22 @@ static ADDRINT loadAddr2Reg(ADDRINT * addr, UINT32 size)
 }
 
 
+VOID multiMemAccessStore(const PIN_MULTI_MEM_ACCESS_INFO* multiMemAccessInfo, const ADDRINT value)
+{
+    if(multiMemAccessInfo->numberOfMemops != 1)
+        return;
+
+    const PIN_MEM_ACCESS_INFO *pinMemAccessInfo = &(multiMemAccessInfo->memop[0]);
+    const ADDRINT * addr = (ADDRINT *)pinMemAccessInfo->memoryAddress;
+    const UINT32 size = pinMemAccessInfo->bytesAccessed;
+
+    if(isEntryInMap(addr) == false)
+        return;
+
+    std::cerr << "addr : " << addr << " value: "
+              <<  hex << value << " size: " << size << endl;;
+}
+
 static memoryTranslate * replaceMemoryMapFun( CONTEXT * context, AFUNPTR orgFuncptr,sizeMemoryTranslate_t * size ){
     MAGIC_LOG(_INFO) << "call ... size: " << size ;
 
@@ -272,114 +288,19 @@ static VOID EmulateLoad(INS ins, VOID* v)
         // Delete the instruction
         INS_Delete(ins);
     }
-}
 
-typedef struct memaccess {
-    ADDRINT memAddr;
-    UINT32  accessType; // 1==read, 2==read2, 3==write
-    INT32   memAccessSize;
-} MEM_ACCESS;
-
-typedef struct memaccessrec
-{
-    int numMemAccesses;
-    ADDRINT ip;
-    MEM_ACCESS memAccesses[2];
-} MEM_ACCESS_REC;
-MEM_ACCESS_REC memAccessRec;
-BOOL haveReadAccess = FALSE;
-BOOL haveRead2Access = FALSE;
-BOOL haveWriteAccess = FALSE;
-BOOL haveReadAndWriteAccess = FALSE;
-int CompareMemAccess (MEM_ACCESS *memAccess, PIN_MEM_ACCESS_INFO *pinMemAccessInfo)
-{
-    if (memAccess->accessType==2)
+    if (INS_HasMemoryRead2(ins))
     {
-        haveRead2Access = TRUE;
-    }
-    else if (memAccess->accessType == 1)
-    {
-        haveReadAccess = TRUE;
-    }
-    else
-    {
-         haveWriteAccess = TRUE;
-    }
-    return ((memAccess->memAddr==pinMemAccessInfo->memoryAddress)
-            &&(memAccess->memAccessSize==(INT32)(pinMemAccessInfo->bytesAccessed))
-            && ((pinMemAccessInfo->memopType==PIN_MEMOP_LOAD &&
-                (memAccess->accessType==1 || memAccess->accessType==2))
-                || (pinMemAccessInfo->memopType==PIN_MEMOP_STORE &&  memAccess->accessType==3)));
-}
-
-VOID CompareMultiMemAccess(ADDRINT ip, PIN_MULTI_MEM_ACCESS_INFO* multiMemAccessInfo)
-{
-    /*printf ("offsetof(PIN_MULTI_MEM_ACCESS_INFO, memop) %x\noffsetof(PIN_MEM_ACCESS_INFO, memoryAddress) %x\noffsetof(PIN_MEM_ACCESS_INFO, memopType) %x\noffsetof(PIN_MEM_ACCESS_INFO, bytesAccessed) %x\noffsetof(PIN_MEM_ACCESS_INFO, maskOn) %x\n",
-            offsetof(PIN_MULTI_MEM_ACCESS_INFO, memop),
-            offsetof(PIN_MEM_ACCESS_INFO, memoryAddress),
-            offsetof(PIN_MEM_ACCESS_INFO, memopType),
-            offsetof(PIN_MEM_ACCESS_INFO, bytesAccessed),
-            offsetof(PIN_MEM_ACCESS_INFO, maskOn));*/
-    if ((int)multiMemAccessInfo->numberOfMemops != memAccessRec.numMemAccesses)
-    {
-        printf ("got different number of mem accesses at ip %p multiMemAccessInfo->numberOfMemops %d memAccessRec.numMemAccesses %d\n",
-                (void *)ip, multiMemAccessInfo->numberOfMemops, memAccessRec.numMemAccesses);
-        fflush (stdout);
-        //exit (1);
-    }
-    if (memAccessRec.ip != ip)
-    {
-        printf ("got different ips ip %p memAccessRec.ip %p\n",
-                (void *)ip, (void *)memAccessRec.ip);
-        fflush (stdout);
-        //exit (1);
+        std::cerr << "INS_HasMemoryRead2 at " << hex << INS_Address(ins) << " " << INS_Disassemble(ins).c_str() << std::endl;
     }
 
-
-    if (memAccessRec.numMemAccesses == 1)
+    if (false &&
+            INS_IsMemoryRead(ins) &&
+            INS_OperandIsReg(ins, 0) &&
+            INS_OperandIsMemory(ins, 1))
     {
-        PIN_MEM_ACCESS_INFO *pinMemAccessInfo = &(multiMemAccessInfo->memop[0]);
-        if (!CompareMemAccess(&memAccessRec.memAccesses[0], pinMemAccessInfo))
-        {
-            printf ("different mem accesses at ip %p\n", (void *)ip);
-            printf ("  memAccessRec.accessType %d multiAccess.accessType %d\n", memAccessRec.memAccesses[0].accessType, pinMemAccessInfo->memopType);
-            printf ("  memAccessRec.memAddr %p multiAccess.memAddr %p\n", (void *)memAccessRec.memAccesses[0].memAddr, (void *)pinMemAccessInfo->memoryAddress);
-            printf ("  memAccessRec.memAccessSize %d multiAccess.memAccessSize %d\n", memAccessRec.memAccesses[0].memAccessSize,
-                    pinMemAccessInfo->bytesAccessed);
-            fflush (stdout);
-            //exit (1);
-        }
+        std::cerr << "INS_IsMemoryRead at " << hex << INS_Address(ins) << " " << INS_Disassemble(ins).c_str() << std::endl;
     }
-    else
-    {
-        if (memAccessRec.memAccesses[1].accessType == 1 && memAccessRec.memAccesses[0].accessType==3)
-        {
-            haveReadAndWriteAccess = TRUE;
-        }
-        else if (memAccessRec.memAccesses[0].accessType == 1 && memAccessRec.memAccesses[1].accessType==3)
-        {
-            haveReadAndWriteAccess = TRUE;
-        }
-
-        if (! ((CompareMemAccess(&memAccessRec.memAccesses[0], &(multiMemAccessInfo->memop[0]))
-                && CompareMemAccess(&memAccessRec.memAccesses[1], &(multiMemAccessInfo->memop[1])))
-               ||(CompareMemAccess(&memAccessRec.memAccesses[0], &(multiMemAccessInfo->memop[1]))
-                  && CompareMemAccess(&memAccessRec.memAccesses[1], &(multiMemAccessInfo->memop[0])))))
-        {
-            printf ("different mem accesses at ip %p\n", (void *)ip);
-            printf ("  memAccessRec[0].accessType %d memAccessRec[1].accessType %d\n", memAccessRec.memAccesses[0].accessType, memAccessRec.memAccesses[1].accessType);
-            printf ("  memAccessRec[0].memAddr %p memAccessRec[1].memAddr %p\n", (void *)memAccessRec.memAccesses[0].memAddr, (void *)memAccessRec.memAccesses[1].memAddr);
-            printf ("  memAccessRec[0].memAccessSize %d memAccessRec[1].memAccessSize %d\n", memAccessRec.memAccesses[0].memAccessSize,
-                    memAccessRec.memAccesses[1].memAccessSize);
-            printf ("  multiMemAccessInfo->memop[0].memopType %d multiMemAccessInfo->memop[1].memopType %d\n", multiMemAccessInfo->memop[0].memopType, multiMemAccessInfo->memop[1].memopType);
-            printf ("  multiMemAccessInfo->memop[0].memoryAddress %p multiMemAccessInfo->memop[1].memoryAddress %p\n",
-                    (void *)multiMemAccessInfo->memop[0].memoryAddress,  (void *)multiMemAccessInfo->memop[1].memoryAddress);
-            printf ("  multiMemAccessInfo->memop[0].bytesAccessed %d multiMemAccessInfo->memop[1].bytesAccessed %d\n", multiMemAccessInfo->memop[0].bytesAccessed, multiMemAccessInfo->memop[1].bytesAccessed);
-            fflush (stdout);
-            //exit (1);
-        }
-    }
-    memAccessRec.numMemAccesses = 0;
 }
 
 //__attribute__((unused))
@@ -390,7 +311,23 @@ static VOID EmulateStore(INS ins, VOID* v)
         INS_IsMemoryWrite(ins) &&
         INS_OperandIsMemory(ins, 0))
     {
-      std::cerr << "Instrumenting at " << hex << INS_Address(ins) << " " << INS_Disassemble(ins).c_str() << " HAS " << INS_hasKnownMemorySize(ins) << std::endl;
+      //std::cerr << "Instrumenting at " << hex << INS_Address(ins) << " " << INS_Disassemble(ins).c_str() << " HAS " << INS_hasKnownMemorySize(ins) << std::endl;
+      if(INS_hasKnownMemorySize(ins)){
+          if(INS_OperandIsReg(ins, 1)){
+              INS_InsertCall(ins,
+                             IPOINT_BEFORE,
+                             AFUNPTR(multiMemAccessStore),
+                             IARG_MULTI_MEMORYACCESS_EA,
+                             IARG_REG_VALUE,
+                             INS_OperandReg(ins, 1),
+                             IARG_END);
+      } else if(INS_OperandIsImmediate(ins, 1)){
+                      INS_InsertCall(ins, IPOINT_BEFORE, (AFUNPTR)multiMemAccessStore,
+                                              IARG_MULTI_MEMORYACCESS_EA,
+                                     IARG_UINT64, INS_OperandImmediate(ins, 1),
+                                              IARG_END);
+          }
+      } else {
         if(INS_OperandIsReg(ins, 1)){
             INS_InsertCall(ins,
                            IPOINT_BEFORE,
@@ -400,9 +337,7 @@ static VOID EmulateStore(INS ins, VOID* v)
                            INS_OperandReg(ins, 1),
                            IARG_MEMORYWRITE_SIZE,
                            IARG_END);
-    }
-
-        else if(INS_OperandIsImmediate(ins, 1) && !INS_hasKnownMemorySize(ins)){
+    } else if(INS_OperandIsImmediate(ins, 1)){
         INS_InsertCall(ins,
                            IPOINT_BEFORE,
                            //AFUNPTR(storeImmediate2Addr),
@@ -414,11 +349,7 @@ static VOID EmulateStore(INS ins, VOID* v)
                        IARG_UINT32,
                        IARG_MEMORYWRITE_SIZE,
                            IARG_END);
-    } else if(INS_OperandIsImmediate(ins, 1) && INS_hasKnownMemorySize(ins)){
-            INS_InsertCall(ins, IPOINT_BEFORE, (AFUNPTR)CompareMultiMemAccess,
-                                    IARG_INST_PTR,
-                                    IARG_MULTI_MEMORYACCESS_EA,
-                                    IARG_END);
+            }
         }
     }
 }
