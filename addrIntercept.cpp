@@ -291,7 +291,6 @@ static VOID EmulateStore(INS ins, VOID* v)
         INS_IsMemoryWrite(ins) &&
         INS_OperandIsMemory(ins, 0))
     {
-      //std::cerr << "Instrumenting at " << hex << INS_Address(ins) << " " << INS_Disassemble(ins).c_str() << " HAS " << INS_hasKnownMemorySize(ins) << std::endl;
       if(INS_hasKnownMemorySize(ins)){
           if(INS_OperandIsReg(ins, 1)){
               INS_InsertCall(ins,
@@ -362,18 +361,13 @@ int main(int argc, CHAR *argv[])
             << " or " << KnobOutputFifo.Value();
         return -2;
     }
-/*
-    string line;
-    while(std::getline(inFifo, line)){
-    cout << "line " << line << endl;
-    }
-*/
+
     IMG_AddInstrumentFunction(ImageReplace, 0);
 
     INS_AddInstrumentFunction(EmulateLoad, 0);
 
     INS_AddInstrumentFunction(EmulateStore, 0);
-    
+
     MAGIC_LOG(_DEBUG) << "Start...";
     PIN_StartProgram();
     
