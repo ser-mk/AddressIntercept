@@ -254,7 +254,7 @@ static VOID ImageReplace(IMG img, VOID *v)
             IARG_FUNCARG_ENTRYPOINT_VALUE, 0,
             IARG_END);
 
-        MAGIC_LOG(_INFO) << "!Replaced free() in:"  << IMG_Name(img);
+        MAGIC_LOG(_INFO) << "!Replaced " << NAME_MEMORY_MAP_FUNCTION << " in:"  << IMG_Name(img);
     }
 }
 
