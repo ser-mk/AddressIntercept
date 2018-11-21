@@ -15,6 +15,12 @@ typedef uint32_t * addr_t;
 typedef uint64_t * addr_t;
 #endif
 
+#if defined(__LP64__) || defined(_LP64)
+typedef uint64_t  AddrType;
+#else
+typedef uint32_t  AddrType;
+#endif
+
 typedef struct
 {
  addr_t start_addr;
