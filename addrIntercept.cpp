@@ -40,7 +40,7 @@ END_LEGAL */
 
 //todo: add magic field
 #if defined(TARGET_IA32)
-#define FORMAT_PIPE_STRING "id:%ld | %s | addr: %p | size: %d | value: 0x%x | st: %s"
+#define FORMAT_PIPE_STRING "id:%lld | %s | addr: %p | size: %d | value: 0x%x | st: %s"
 #else
 #define FORMAT_PIPE_STRING "id:%ld | %s | addr: %p | size: %d | value: 0x%lx | st: %s"
 #endif
@@ -67,11 +67,8 @@ static ifstream inFifo;
 static ofstream outFifo;
 static memoryTranslate * addrMap = NULL;
 static sizeMemoryTranslate_t sizeMap = 0;
-#if defined(TARGET_IA32)
-static long int id = 0;
-#else
 static uint64_t id = 0;
-#endif
+
 
 const size_t BUFFER_SIZE = 100;
 char pipeBuffer[BUFFER_SIZE] = {0};
@@ -119,11 +116,9 @@ static void sendCommand(const string & command, const ADDRINT * addr, const UINT
 static bool parseValue(const string & line, ADDRINT & value){
     char command_str[20];
     char status_str[20];
-    #if defined(TARGET_IA32)
-    static long int id_in = 0;
-    #else
+
     static uint64_t id_in = 0;
-    #endif
+
     ADDRINT * addr = NULL;
     UINT32 size = 0;
 
