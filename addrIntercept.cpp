@@ -172,13 +172,6 @@ VOID storeReg2Addr(ADDRINT * addr, ADDRINT value, UINT32 size)
     }
 
 }
-/*
-// Move a register or literal to memory
-static VOID storeImmediate2Addr(ADDRINT * op0, ADDRINT op1)
-{
-  //std::cerr << "Immediate op0 "<< hex << op0 << " reg " << hex << op1  <<endl;
-}
-*/
 
 // Move from memory to register
 static ADDRINT loadAddr2Reg(ADDRINT * addr, UINT32 size)
