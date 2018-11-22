@@ -1,4 +1,4 @@
-
+*.c
 *.elf
 obj-ia32/
 obj-intel64/
