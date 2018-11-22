@@ -198,8 +198,8 @@ static VOID multiMemAccessStore(const PIN_MULTI_MEM_ACCESS_INFO* multiMemAccessI
     if(isEntryInMap(addr) == false)
         return;
 
-    std::cerr << "addr : " << addr << " value: "
-              <<  hex << value << " size: " << size << endl;
+    MAGIC_LOG(_DEBUG) << "addr : " << addr << " value: "
+              <<  hex << value << " size: " << size;
 
     storeReg2Addr(addr,value,size);
 }
