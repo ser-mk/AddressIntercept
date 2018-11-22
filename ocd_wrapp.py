@@ -1,4 +1,6 @@
 from ocd_rpc import OpenOcd
+import logging
+
 
 class OCDWrapp():
 	__WORD_SIZE = 4
@@ -17,7 +19,6 @@ class OCDWrapp():
 	def load(self, addr: int, size: int) -> int:
 		addr &= self.__ADDR_MASK
 		tmp = self.ocd.readVariable(addr)
-		print("type: ", type(tmp))
 		if size == self.__WORD_SIZE :
 			tmp &= self.__WORD_MASK
 		elif size == self.__HALF_WORD_SIZE :
@@ -26,7 +27,7 @@ class OCDWrapp():
 			tmp &= self.__BYTE_MASK
 		else :
 			tmp = None
-			print("error load size!")
+			logging.error("error load size!")
 		return tmp
 
 	def store(self, addr: int, size: int, value: int) -> bool:
@@ -42,8 +43,9 @@ class OCDWrapp():
 		elif size == self.__BYTE_SIZE:
 			tmp = (read & (self.__WORD_MASK ^ self.__BYTE_MASK)) | value # read & 0xFFFF FF00
 		elif size != self.__WORD_SIZE :
-			print("error store size!")
+			logging.error("error store size!")
 			return False
 
+		logging.debug("store: addr %x tmp %x", addr, tmp)
 		self.ocd.writeVariable(addr, tmp)
 		return True

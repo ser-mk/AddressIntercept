@@ -2,9 +2,10 @@
 # -*- coding: utf-8 -*-
 
 from scanf import scanf
-from pprint import pprint
 from ocd_rpc import OpenOcd
 from ocd_wrapp import OCDWrapp
+
+import logging
 
 
 PATTERN_SCANF 	= "id:%d | %s | addr: %x | size: %d | value: %x | st: "
@@ -25,6 +26,8 @@ def initOCD(ocd:OpenOcd) -> None :
 	global _ocdw
 	_ocdw = OCDWrapp(ocd)
 	ocd.send("reset halt")
+	logging.info("connect OCD server")
+	#ocd.send("ocd_echo \"echo says hi!\"")[:-1]
 
 
 class AddrCommand:
@@ -50,7 +53,7 @@ def _load(struct_command:AddrCommand) -> int :
 	except Exception as e:
 		#raise
 		#struct_command.status = OCD_ERROR_STATUS
-		print("_load: ", e)
+		logging.critical(e)
 	else:
 		if not _checkValueSuccess(value) :
 			#struct_command.status = OCD_ERROR_STATUS
@@ -66,7 +69,7 @@ def _store(struct_command:AddrCommand) -> bool :
 	except Exception as e:
 		#raise
 		#struct_command.status = OCD_ERROR_STATUS
-		print("_store: ", e)
+		logging.critical(e)
 
 	return success
 
@@ -80,7 +83,7 @@ def _parse(line: str) -> AddrCommand:
 	try:
 		_id, command, addr, size, value = scanf(PATTERN_SCANF, line)
 	except Exception as e:
-		print("parse - ", e, " - line : ", line)
+		logging.error("parse - %s - line : %s", e, line)
 		raise e
 	else:
 		struct._id = _id
@@ -93,7 +96,8 @@ def _parse(line: str) -> AddrCommand:
 
 def proccess(line: str) -> str:
 	struct_command = _parse(line)
-	print("struct_command: ",struct_command._id, struct_command.command, struct_command.addr, struct_command.size, struct_command.value, struct_command.status)
+	logging.debug("struct_command: %d %s %x %d %x %s",struct_command._id, struct_command.command,
+	 struct_command.addr, struct_command.size, struct_command.value, struct_command.status)
 	if struct_command.command == COMMAND_LOAD :
 		value = _load(struct_command)
 		if value < 0 :
