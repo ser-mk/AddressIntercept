@@ -205,7 +205,6 @@ static VOID multiMemAccessStore(const PIN_MULTI_MEM_ACCESS_INFO* multiMemAccessI
 }
 
 static memoryTranslate * replaceMemoryMapFun( CONTEXT * context, AFUNPTR orgFuncptr,sizeMemoryTranslate_t * size ){
-    MAGIC_LOG(_INFO) << "call ... size: " << size ;
 
         PIN_CallApplicationFunction(context, PIN_ThreadId(),
             CALLINGSTD_DEFAULT, orgFuncptr, NULL,
@@ -215,7 +214,7 @@ static memoryTranslate * replaceMemoryMapFun( CONTEXT * context, AFUNPTR orgFunc
 
         sizeMap = *size;
 
-         MAGIC_LOG(_INFO) << "memoryTranslate : " << addrMap;
+         MAGIC_LOG(_INFO) << "Get memory map | size : " << sizeMap;
     return addrMap;
 }
 
