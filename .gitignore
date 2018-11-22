@@ -1,0 +1,6 @@
+
+*.elf
+obj-ia32/
+obj-intel64/
+__pycache__/
+*.so
