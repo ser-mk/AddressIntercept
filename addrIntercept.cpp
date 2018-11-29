@@ -76,7 +76,6 @@ char pipeBuffer[BUFFER_SIZE] = {0};
 static bool isEntryInMap(const ADDRINT * addr){
     if(addrMap == NULL
             || sizeMap == 0 ){
-        //std::cerr << "Map addr don't init!" <<  endl;
         return false;
     }
     for(sizeMemoryTranslate_t i = 0; i < sizeMap; i++){
@@ -257,7 +256,6 @@ static VOID ImageReplace(IMG img, VOID *v)
     }
 }
 
-//__attribute__((unused))
 static VOID EmulateLoad(INS ins, VOID* v)
 {
     // Find the instructions that move a value from memory to a register
@@ -282,10 +280,8 @@ static VOID EmulateLoad(INS ins, VOID* v)
     }
 }
 
-//__attribute__((unused))
 static VOID EmulateStore(INS ins, VOID* v)
 {
-    // Find the instructions that move a value from memory to a register
     if (INS_Opcode(ins) == XED_ICLASS_MOV &&
         INS_IsMemoryWrite(ins) &&
         INS_OperandIsMemory(ins, 0))
@@ -318,10 +314,8 @@ static VOID EmulateStore(INS ins, VOID* v)
     } else if(INS_OperandIsImmediate(ins, 1)){
         INS_InsertCall(ins,
                            IPOINT_BEFORE,
-                           //AFUNPTR(storeImmediate2Addr),
                             AFUNPTR(storeReg2Addr),
                            IARG_MEMORYWRITE_EA,
-                           //IARG_UINT32,
                        IARG_UINT64,
                         INS_OperandImmediate(ins, 1),
                        IARG_UINT32,
