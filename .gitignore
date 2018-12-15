@@ -4,3 +4,9 @@ obj-ia32/
 obj-intel64/
 __pycache__/
 *.so
+
+addrIntercept.config
+addrIntercept.creator
+addrIntercept.creator.user
+addrIntercept.files
+addrIntercept.includes
