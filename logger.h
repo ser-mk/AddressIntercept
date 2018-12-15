@@ -1,6 +1,7 @@
 #ifndef LOGGER_H
 #define LOGGER_H
 #include <iostream>
+#include <pin.H>
 
 enum LevelDebug { _ERROR = 0, _WARNING, _INFO, _DEBUG, _ALL_LOG };
 
