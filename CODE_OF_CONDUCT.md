@@ -1,0 +1,1 @@
+Use flake8 --max-line-length=179 .

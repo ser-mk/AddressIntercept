@@ -1,4 +1,5 @@
-#!/usr/bin/env python3
+#!/usr/bin/env python3.5m
+# -*- coding: utf-8 -*-
 """
 OpenOCD RPC example, covered by GNU GPLv3 or later
 Copyright (C) 2014 Andreas Ortmann (ortmann@finf.uni-hannover.de)
@@ -26,11 +27,14 @@ memory (after): ['0x00000001', '0x00000000', '0xaaaaaaaa', '0x00000023',
 import socket
 import itertools
 
+
 def strToHex(data):
     return map(strToHex, data) if isinstance(data, list) else int(data, 16)
 
+
 def hexify(data):
     return "<None>" if data is None else ("0x%08x" % data)
+
 
 def compareData(a, b):
     for i, j, num in zip(a, b, itertools.count(0)):
@@ -40,11 +44,12 @@ def compareData(a, b):
 
 class OpenOcd:
     COMMAND_TOKEN = '\x1a'
-    def __init__(self, verbose:bool = False, tclRpcIp:str = "127.0.0.1", tclRpcPort:int = 6666):
+
+    def __init__(self, verbose: bool = False, tclRpcIp: str = "127.0.0.1", tclRpcPort: int = 6666):
         self.verbose = verbose
-        self.tclRpcIp       = tclRpcIp  #"127.0.0.1"
-        self.tclRpcPort     = tclRpcPort
-        self.bufferSize     = 4096
+        self.tclRpcIp = tclRpcIp  # "127.0.0.1"
+        self.tclRpcPort = tclRpcPort
+        self.bufferSize = 4096
 
         self.sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 
@@ -80,7 +85,7 @@ class OpenOcd:
             print("-> ", data)
 
         data = data.decode("utf-8").strip()
-        data = data[:-1] # strip trailing \x1a
+        data = data[:-1]  # strip trailing \x1a
 
         return data
 
@@ -89,12 +94,12 @@ class OpenOcd:
         return None if (len(raw) < 2) else strToHex(raw[1])
 
     def readMemory(self, wordLen, address, n):
-        self.send("array unset output") # better to clear the array before
+        self.send("array unset output")  # better to clear the array before
         self.send("mem2array output %d 0x%x %d" % (wordLen, address, n))
 
         output = self.send("ocd_echo $output").split(" ")
 
-        return [int(output[2*i+1]) for i in range(len(output)//2)]
+        return [int(output[2 * i + 1]) for i in range(len(output) // 2)]
 
     def writeVariable(self, address, value):
         assert value is not None
@@ -103,16 +108,17 @@ class OpenOcd:
     def writeMemory(self, wordLen, address, n, data):
         array = " ".join(["%d 0x%x" % (a, b) for a, b in enumerate(data)])
 
-        self.send("array unset 1986ве1т") # better to clear the array before
+        self.send("array unset 1986ве1т")  # better to clear the array before
         self.send("array set 1986ве1т { %s }" % array)
         self.send("array2mem 1986ве1т 0x%x %s %d" % (wordLen, address, n))
+
 
 if __name__ == "__main__":
 
     def show(*args):
         print(*args, end="\n\n")
 
-    with OpenOcd(verbose = False, tclRpcIp = "192.168.0.111" ) as ocd:
+    with OpenOcd(verbose=False, tclRpcIp="192.168.0.111") as ocd:
         ocd.send("reset")
 
         show(ocd.send("ocd_echo \"echo says hi!\"")[:-1])
@@ -126,7 +132,8 @@ if __name__ == "__main__":
         show("variable @ %s: %s" % (hexify(addr), hexify(value)))
 
         ocd.writeVariable(addr, 0xdeadc0de)
-        show("variable @ %s: %s" % (hexify(addr), hexify(ocd.readVariable(addr))))
+        show("variable @ %s: %s" %
+             (hexify(addr), hexify(ocd.readVariable(addr))))
 
         data = [1, 0, 0xaaaaaaaa, 0x23, 0x42, 0xffff]
         wordlen = 32
