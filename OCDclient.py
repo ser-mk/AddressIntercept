@@ -27,7 +27,7 @@ parser.add_argument("-v", help="verbosity level log: DEBUG, INFO, WARNING, ERROR
 
 args = parser.parse_args()
 
-print(args.in_, args.out, args.ip, args.v)
+logging.info(args.in_, args.out, args.ip, args.v)
 
 logging.basicConfig(format=u'%(filename)s[LINE:%(lineno)d]* %(levelname)-8s [%(asctime)s]  %(message)s',
                     level=args.v)
@@ -62,7 +62,7 @@ with open(IN_FIFO, 'r') as inFifo:
             while True:
                 line = inFifo.readline()
                 if len(line) == 0:
-                    logging.warning("closed fifo %s", IN_FIFO)
+                    logging.info("closing fifo %s", IN_FIFO)
                     break
                 logging.debug("Get line: %s", line)
                 answer = proccess(line)
