@@ -78,7 +78,7 @@ static void sendCommand(const string &command, const ADDRINT *addr,
   const ADDRINT *remAddr = local2remoteAddr(addr);
   const int write_size = snprintf(
       pipeBuffer, BUFFER_SIZE,
-      FORMAT_PIPE_STRING, //"id:%lx | %s | addr: %p | size: %d | value: %lx",
+      FORMAT_PIPE_STRING,
       id, command.c_str(), remAddr, size, value, "");
   if (write_size <= 0) {
     MAGIC_LOG(_ERROR) << "small pipe buffer: " << BUFFER_SIZE;
