@@ -1,3 +1,10 @@
+/*
+ * Covered by Apache License 2.0
+ * Copyright (C) 2018 Evgeny Chormonov (en.chormonov@gmail.com)
+ * For more information https://github.com/ser-mk/AddressIntercept
+ */
+
+
 #include <stdint.h>
 #pragma once
 

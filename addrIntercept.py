@@ -1,6 +1,12 @@
 #!/usr/bin/env python3.5m
 # -*- coding: utf-8 -*-
 
+"""
+Covered by Apache License 2.0
+Copyright (C) 2018 Evgeny Chormonov (en.chormonov@gmail.com)
+For more information https://github.com/ser-mk/AddressIntercept
+"""
+
 from scanf import scanf
 from ocd_rpc import OpenOcd
 from ocd_wrapp import OCDWrapp
