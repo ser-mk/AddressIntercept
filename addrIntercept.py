@@ -105,9 +105,11 @@ def _parse(line: str) -> AddrCommand:
 
 
 def proccess(line: str) -> str:
+    # todo: check size of line
     struct_command = _parse(line)
     logging.debug("struct_command: %d %s %x %d %x %s", struct_command._id, struct_command.command,
                   struct_command.addr, struct_command.size, struct_command.value, struct_command.status)
+    # todo: check id of message
     if struct_command.command == COMMAND_LOAD:
         value = _load(struct_command)
         if value < 0:

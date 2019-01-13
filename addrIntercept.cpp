@@ -82,6 +82,7 @@ static void sendCommand(const string &command, const ADDRINT *addr,
       id, command.c_str(), remAddr, size, value, "");
   if (write_size <= 0) {
     MAGIC_LOG(_ERROR) << "small pipe buffer: " << BUFFER_SIZE;
+    // todo: throw error
   }
 
   outFifo << pipeBuffer << endl;
@@ -95,6 +96,8 @@ static bool parseValue(const string &line, ADDRINT &value) {
 
   ADDRINT *addr = NULL;
   UINT32 size = 0;
+
+  // todo: check size of the line
 
   const int scan_size = sscanf(line.c_str(), FORMAT_PIPE_STRING, &id_in,
                                command_str, &addr, &size, &value, status_str);
@@ -112,7 +115,7 @@ static bool parseValue(const string &line, ADDRINT &value) {
     return false;
   }
 
-  // Todo: check magic number
+  // todo: check magic number
 
   return true;
 }
@@ -225,6 +228,8 @@ static VOID ImageReplace(IMG img, VOID *v) {
 
     MAGIC_LOG(_INFO) << "!Replaced " << NAME_MEMORY_MAP_FUNCTION
                      << " in:" << IMG_Name(img);
+  } else {
+      // todo: handle if $NAME_MEMORY_MAP_FUNCTION is absent
   }
 }
 
