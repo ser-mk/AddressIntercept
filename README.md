@@ -1,5 +1,7 @@
 # AddressIntercept
 
+Habrahabr articles https://habr.com/ru/post/433504/ & https://habr.com/ru/post/434080/
+
 AddressIntercept is [pintool](https://software.intel.com/en-us/articles/pin-a-dynamic-binary-instrumentation-tool "pintool") client for аn address intercept. The instrument intercepts read-write operations of certain memory addresses. It also includes OpenOCD client, which interacts with OpenOCD server. Together they provide easy to use remote control of a microcontroller periphery.
 
 For example: if you need to control a GPIO of stm32f103 MCU from a PC program. You can  use the trick in your own code:
